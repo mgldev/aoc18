@@ -1,7 +1,6 @@
 <?php
 
 $boxIds = explode(PHP_EOL, file_get_contents(__DIR__ . '/../input.txt'));
-
 $twoLetterCount = $threeLetterCount = 0;
 
 foreach ($boxIds as $index => $boxId) {
