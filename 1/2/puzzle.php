@@ -1,6 +1,5 @@
 <?php
 
-// day one, puzzle two
 $frequencyModifiers = explode(PHP_EOL, file_get_contents(__DIR__ . '/../input.txt'));
 $frequencies = [];
 $currentFrequency = 0;
