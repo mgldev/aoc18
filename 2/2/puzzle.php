@@ -1,12 +1,16 @@
 <?php
 
 $boxIds = explode(PHP_EOL, file_get_contents(__DIR__ . '/../input.txt'));
-$twoLetterCount = $threeLetterCount = 0;
 
-foreach ($boxIds as $index => $boxId) {
-    $counts = array_unique(array_values(array_count_values(str_split($boxId))));
-    $twoLetterCount += (int) in_array(2, $counts);
-    $threeLetterCount += (int) in_array(3, $counts);
+foreach ($boxIds as $boxId) {
+    foreach ($boxIds as $boxIdToCompare) {
+        $lev = levenshtein($boxId, $boxIdToCompare);
+        if ($lev === 1) {
+            $diff = array_diff_assoc($a = str_split($boxId), $b = str_split($boxIdToCompare));
+            $index = array_keys($diff)[0];
+            unset($a[$index], $b[$index]);
+            $answer = implode('', $a);
+            die($answer);
+        }
+    }
 }
-
-echo $twoLetterCount * $threeLetterCount;
