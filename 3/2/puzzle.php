@@ -1,6 +1,6 @@
 <?php
 
-require_once 'Claim.php';
+require_once __DIR__ . '/../1/Claim.php';
 
 /** @var Claim[] $claims */
 $claims = [];
