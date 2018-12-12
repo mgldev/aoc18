@@ -68,8 +68,7 @@ class Guard
         $minutesAsleepArray = [];
 
         foreach ($this->sleepLog as $sleepPeriod) {
-            foreach ($sleepPeriod->toMinutesArray() as $minute)
-            $minutesAsleepArray[] = $minute;
+            $minutesAsleepArray = array_merge($minutesAsleepArray, $sleepPeriod->toMinutesArray());
         }
 
         $counts = array_count_values($minutesAsleepArray);
