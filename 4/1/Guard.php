@@ -20,6 +20,14 @@ class Guard
     }
 
     /**
+     * @return string
+     */
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    /**
      * @param SleepPeriod $sleepPeriod
      */
     public function recordSleepPeriod(SleepPeriod $sleepPeriod)
@@ -50,16 +58,27 @@ class Guard
     }
 
     /**
-     * @return array
+     * @return int
      */
-    public function getMinutesAsleepArray(): array
+    public function getMostFrequentlyOccurringMinute(): int
     {
         $minutesAsleepArray = [];
 
         foreach ($this->sleepLog as $sleepPeriod) {
-            $minutesAsleepArray[] = $sleepPeriod->toMinutesArray();
+            $minutesAsleepArray= array_merge($minutesAsleepArray, $sleepPeriod->toMinutesArray());
         }
 
-        return $minutesAsleepArray;
+        $counts = array_count_values($minutesAsleepArray);
+        arsort($counts);
+
+        return array_keys($counts)[0];
+    }
+
+    /**
+     * @return int
+     */
+    public function getAdventOfCodeAnswer(): int
+    {
+        return $this->getId() * $this->getMostFrequentlyOccurringMinute();
     }
 }

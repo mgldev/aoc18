@@ -29,4 +29,23 @@ class GuardCollection
     {
         return $this->guards;
     }
+
+    /**
+     * @return Guard
+     */
+    public function getLongestSleeper(): Guard
+    {
+        $longestSleeper = null;
+
+        foreach ($this->all() as $guard) {
+            if (
+                is_null($longestSleeper) ||
+                $longestSleeper instanceof Guard && $guard->getMinutesAsleep() > $longestSleeper->getMinutesAsleep()
+            ) {
+                $longestSleeper = $guard;
+            }
+        }
+
+        return $longestSleeper;
+    }
 }
