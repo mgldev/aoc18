@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class SleepPeriod
+ */
 class SleepPeriod
 {
     /** @var DateTime */
@@ -8,6 +11,12 @@ class SleepPeriod
     /** @var DateTime */
     private $to;
 
+    /**
+     * SleepPeriod constructor.
+     *
+     * @param DateTime $from
+     * @param DateTime $to
+     */
     public function __construct(DateTime $from, DateTime $to)
     {
         $this->from = $from;
@@ -30,6 +39,10 @@ class SleepPeriod
         return $this->to;
     }
 
+    /**
+     * @return array
+     * @throws Exception
+     */
     public function toMinutesArray(): array
     {
         $minutes = [];
@@ -47,5 +60,18 @@ class SleepPeriod
     public function toMinutes(): int
     {
         return count($this->toMinutesArray());
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return sprintf(
+            '[%s] to [%s]: %s minutes',
+            $this->getFrom()->format('Y-m-d H:i'),
+            $this->getTo()->format('Y-m-d H:i'),
+            $this->toMinutes()
+        );
     }
 }

@@ -23,21 +23,17 @@ class GuardBuilder
             return $a->getDateTime() <=> $b->getDateTime();
         });
 
-        $lastGuard = null;
-        $fellAsleepAt = null;
+        $guard = $fellAsleepAt = null;
 
         foreach ($logEntries as $logEntry) {
             if ($logEntry->contains('begins shift')) {
-                if ($lastGuard instanceof Guard) {
-                    $guards[] = $lastGuard;
-                }
                 $matches = [];
                 preg_match('/Guard #(\d+)/', $logEntry->getEvent(), $matches);
-                $lastGuard = $guardCollection->getById($matches[1]);
-                if (!$lastGuard instanceof Guard) {
-                    $lastGuard = new Guard($matches[1]);
+                $guard = $guardCollection->getById($matches[1]);
+                if (!$guard instanceof Guard) {
+                    $guard = new Guard($matches[1]);
+                    $guardCollection->addGuard($guard);
                 }
-                $guardCollection->addGuard($lastGuard);
             }
 
             if ($logEntry->contains('falls asleep')) {
@@ -45,7 +41,7 @@ class GuardBuilder
             }
 
             if ($logEntry->contains('wakes up')) {
-                $lastGuard->recordSleepPeriod(new SleepPeriod($fellAsleepAt, $logEntry->getDateTime()));
+                $guard->recordSleepPeriod(new SleepPeriod($fellAsleepAt, $logEntry->getDateTime()));
             }
         }
 

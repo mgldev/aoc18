@@ -8,9 +8,12 @@ class GuardCollection
     /** @var Guard[] */
     private $guards = [];
 
+    /**
+     * @param Guard $guard
+     */
     public function addGuard(Guard $guard)
     {
-        $this->guards[] = $guard;
+        $this->guards[$guard->getId()] = $guard;
     }
 
     /**

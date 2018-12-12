@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class LogEntry
+ */
 class LogEntry
 {
     /** @var DateTime */

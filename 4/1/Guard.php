@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class Guard
+ */
 class Guard
 {
     /** @var string */
@@ -65,7 +68,8 @@ class Guard
         $minutesAsleepArray = [];
 
         foreach ($this->sleepLog as $sleepPeriod) {
-            $minutesAsleepArray= array_merge($minutesAsleepArray, $sleepPeriod->toMinutesArray());
+            foreach ($sleepPeriod->toMinutesArray() as $minute)
+            $minutesAsleepArray[] = $minute;
         }
 
         $counts = array_count_values($minutesAsleepArray);
