@@ -230,12 +230,6 @@ class CompletedStepVisitor
     public function visit(Step $step)
     {
         $this->steps[$step->getId()] = $step;
-
-        $string = $this->__toString();
-
-        if (substr($string, strlen($string) - 4, 4) === 'GUZE') {
-            $stop = true;
-        }
     }
 
     /**
@@ -278,10 +272,18 @@ class DependencyResolver
                         foreach ($step->getTriggers() as $key => $trigger) {
                             try {
                                 $trigger->complete($completedStepVisitor);
+
+                                foreach ($trigger->getTriggers() as $key2 => $trigger2) {
+                                    try {
+                                        $trigger2->complete($completedStepVisitor);
+                                    } catch (Exception $exception) {
+                                        break 3;
+                                    }
+                                }
+
                             } catch (Exception $exception) {
                                 break 2;
                             }
-
                         }
                     }
                 } catch (Exception $exception) {
