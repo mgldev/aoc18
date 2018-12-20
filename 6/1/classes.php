@@ -250,6 +250,8 @@ class CompletedStepVisitor
     }
 }
 
+class TriggerCompletionFailedException extends Exception {}
+
 /**
  * Class DependencyResolver
  */
@@ -257,7 +259,6 @@ class DependencyResolver
 {
     /**
      * Right answer: OKBNLPHCSVWAIRDGUZEFMXYTJQ
-     * 
      * @param StepCollection $stepCollection
      *
      * @return string
@@ -276,13 +277,8 @@ class DependencyResolver
                                 $trigger->complete($completedStepVisitor);
 
                                 foreach ($trigger->getTriggers() as $key2 => $trigger2) {
-                                    try {
-                                        $trigger2->complete($completedStepVisitor);
-                                    } catch (Exception $exception) {
-                                        break 3;
-                                    }
+                                    $trigger2->complete($completedStepVisitor);
                                 }
-
                             } catch (Exception $exception) {
                                 break 2;
                             }
