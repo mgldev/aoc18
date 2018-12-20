@@ -1,6 +1,57 @@
 <?php
 
 /**
+ * Class StepCollection
+ */
+class StepCollection
+{
+    /** @var Step[] */
+    private $steps = [];
+
+    /**
+     * @param Step $step
+     */
+    public function addStep(Step $step)
+    {
+        $this->steps[$step->getId()] = $step;
+    }
+
+    /**
+     * @param string $stepId
+     *
+     * @return null|Step
+     */
+    public function getStepById(string $stepId)
+    {
+        return $this->steps[$stepId] ?? null;
+    }
+
+    /**
+     * @return Step[]
+     */
+    public function getSteps(): array
+    {
+        ksort($this->steps);
+
+        return $this->steps;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProcessed(): bool
+    {
+        foreach ($this->getSteps() as $step) {
+            if (!$step->isComplete()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
+/**
  * Class Step
  */
 class Step
@@ -9,7 +60,7 @@ class Step
     private $id;
 
     /** @var Step[] */
-    private $preRequisites = [];
+    private $dependencies = [];
 
     /** @var bool */
     private $isComplete = false;
@@ -31,17 +82,22 @@ class Step
         return $this->id;
     }
 
-    public function addPreRequisite(Step $step)
+    /**
+     * @param Step $step
+     */
+    public function addDependency(Step $step)
     {
-        $this->preRequisites[$step->getId()] = $step;
+        $this->dependencies[$step->getId()] = $step;
     }
 
     /**
      * @return Step[]
      */
-    public function getPreRequisites(): array
+    public function getDependencies(): array
     {
-        return $this->preRequisites;
+        ksort($this->dependencies);
+
+        return $this->dependencies;
     }
 
     /**
@@ -53,28 +109,78 @@ class Step
     }
 
     /**
-     * Perform the step
+     * @return Step|null
      */
-    public function start()
+    public function getNextIncompleteDependency()
     {
-        foreach ($this->getPreRequisites() as $preRequisite) {
-            if (!$preRequisite->isComplete()) {
-                $preRequisite->start();
+        foreach ($this->getDependencies() as $dependency) {
+            if (!$dependency->isComplete()) {
+                return $dependency;
             }
         }
+
+        return null;
+    }
+
+    /**
+     * Perform the step
+     */
+    public function complete()
+    {
+        $this->isComplete = true;
     }
 
     /**
      * @return bool
      */
-    public function isReady(): bool
+    public function hasDependencies(): bool
     {
-        foreach ($this->getPreRequisites() as $preRequisite) {
-            if (!$preRequisite->isComplete()) {
-                return false;
+        return count($this->getDependencies()) > 0;
+    }
+}
+
+$collection = new StepCollection();
+
+foreach (file(__DIR__ . '/../input.txt', FILE_IGNORE_NEW_LINES) as $instruction) {
+    $result = explode('step ', strtolower($instruction));
+    $dependantId = substr($result[1], 0, 1);
+    $id = substr($result[2], 0, 1);
+
+    if (($step = $collection->getStepById($id)) === null) {
+        $step = new Step($id);
+        $collection->addStep($step);
+    }
+
+    if (($dependentStep = $collection->getStepById($dependantId)) === null) {
+        $dependentStep = new Step($dependantId);
+        $collection->addStep($dependentStep);
+    }
+
+    $step->addDependency($dependentStep);
+}
+
+$stop = true;
+
+while (!$collection->isProcessed()) {
+    foreach ($collection->getSteps() as $step) {
+        if (!$step->isComplete()) {
+            attemptStepCompletion($step);
+        }
+    }
+}
+
+function attemptStepCompletion(Step $step)
+{
+    $nextIncompleteStep = $step->getNextIncompleteDependency();
+
+    if (is_null($nextIncompleteStep)) {
+        $step->complete();
+        echo $step->getId();
+    } else {
+        foreach ($step->getDependencies() as $dependency) {
+            if (!$dependency->isComplete()) {
+                attemptStepCompletion($dependency);
             }
         }
-
-        return true;
     }
 }
