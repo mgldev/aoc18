@@ -256,6 +256,8 @@ class CompletedStepVisitor
 class DependencyResolver
 {
     /**
+     * Right answer: OKBNLPHCSVWAIRDGUZEFMXYTJQ
+     * 
      * @param StepCollection $stepCollection
      *
      * @return string
