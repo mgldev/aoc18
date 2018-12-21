@@ -33,7 +33,7 @@ class Step
     {
         foreach ($this->getDependencies() as $dependency) {
             if (!$dependency->isComplete()) {
-                throw new InvalidArgumentException("Failed to complete " . $this->getId() . " - incomplete dependencies");
+                throw new StepDependencyException($this->getId() . ' has unresolved dependencies');
             }
         }
 

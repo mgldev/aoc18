@@ -1,8 +1,5 @@
 <?php
 
-class StepDependencyFailure extends RuntimeException {}
-class TriggerDependencyFailure extends RuntimeException {}
-
 /**
  * Class DependencyResolver
  */
@@ -22,9 +19,9 @@ class DependencyResolver
             foreach ($stepCollection->getSteps() as $step) {
                 try {
                     $this->completeStep($step, $completedStepVisitor);
-                } catch (StepDependencyFailure $stepDependencyFailure) {
+                } catch (StepDependencyException $stepDependencyException) {
                     continue;
-                } catch (TriggerDependencyFailure $triggerDependencyFailure) {
+                } catch (TriggerDependencyException $triggerDependencyException) {
                     break;
                 }
             }
@@ -47,9 +44,10 @@ class DependencyResolver
                     $depth++;
                     $this->completeStep($trigger, $completedStepVisitor, $depth);
                 }
-            } catch (InvalidArgumentException $invalidArgumentException) {
-                $exceptionClass = $depth === 0 ? StepDependencyFailure::class : TriggerDependencyFailure::class;
-                throw new $exceptionClass($invalidArgumentException->getMessage());
+            } catch (StepDependencyException $stepDependencyException) {
+                if ($depth > 0) {
+                    throw new TriggerDependencyException($stepDependencyException->getMessage());
+                }
             }
         }
     }
