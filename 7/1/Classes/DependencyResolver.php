@@ -1,5 +1,8 @@
 <?php
 
+class StepDependencyFailure extends RuntimeException {}
+class TriggerDependencyFailure extends RuntimeException {}
+
 /**
  * Class DependencyResolver
  */
@@ -18,26 +21,36 @@ class DependencyResolver
         while (!$stepCollection->isProcessed()) {
             foreach ($stepCollection->getSteps() as $step) {
                 try {
-                    if (!$step->isComplete()) {
-                        $step->complete($completedStepVisitor);
-                        foreach ($step->getTriggers() as $key => $trigger) {
-                            try {
-                                $trigger->complete($completedStepVisitor);
-
-                                foreach ($trigger->getTriggers() as $key2 => $trigger2) {
-                                    $trigger2->complete($completedStepVisitor);
-                                }
-                            } catch (Exception $exception) {
-                                break 2;
-                            }
-                        }
-                    }
-                } catch (Exception $exception) {
+                    $this->completeStep($step, $completedStepVisitor);
+                } catch (StepDependencyFailure $stepDependencyFailure) {
                     continue;
+                } catch (TriggerDependencyFailure $triggerDependencyFailure) {
+                    break;
                 }
             }
         }
 
         return (string) $completedStepVisitor;
+    }
+
+    /**
+     * @param Step $step
+     * @param CompletedStepVisitor $completedStepVisitor
+     * @param int $depth
+     */
+    private function completeStep(Step $step, CompletedStepVisitor $completedStepVisitor, int &$depth = 0)
+    {
+        if (!$step->isComplete()) {
+            try {
+                $step->complete($completedStepVisitor);
+                foreach ($step->getTriggers() as $trigger) {
+                    $depth++;
+                    $this->completeStep($trigger, $completedStepVisitor, $depth);
+                }
+            } catch (InvalidArgumentException $invalidArgumentException) {
+                $exceptionClass = $depth === 0 ? StepDependencyFailure::class : TriggerDependencyFailure::class;
+                throw new $exceptionClass($invalidArgumentException->getMessage());
+            }
+        }
     }
 }
